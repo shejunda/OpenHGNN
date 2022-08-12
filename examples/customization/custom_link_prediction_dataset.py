@@ -116,7 +116,7 @@ if __name__ == '__main__':
                                           split_ratio=[0.8, 0.1, 0.1], force_reload=True)
     train_with_custom_lp_dataset(myLPDataset)
 
-    mySplitLPDatasetWithNegEdges = AsLinkPredictionDataset(MySplitLPDatasetWithNegEdges(), target_link=target_link,
-                                                           target_link_r=target_link_r,
-                                                           force_reload=True)
-    train_with_custom_lp_dataset(mySplitLPDatasetWithNegEdges)
+    # mySplitLPDatasetWithNegEdges = AsLinkPredictionDataset(MySplitLPDatasetWithNegEdges(), target_link=target_link,
+    #                                                        target_link_r=target_link_r,
+    #                                                        force_reload=True)
+    # train_with_custom_lp_dataset(mySplitLPDatasetWithNegEdges)

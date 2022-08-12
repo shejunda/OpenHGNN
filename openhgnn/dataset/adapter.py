@@ -187,8 +187,10 @@ class AsLinkPredictionDataset(DGLDataset):
 
     Parameters
     ----------
-    dataset : DGLDataset
-        The dataset to be converted.
+    data : DGLDataset or DGLHeteroGraph
+        The dataset or graph to be converted.
+    name : str
+        The dataset name. Optional when data is DGLDataset. Required when data is DGLHeteroGraph.
     split_ratio : (float, float, float), optional
         Split ratios for training, validation and test sets. Must sum to one.
     neg_ratio : int, optional
@@ -213,13 +215,25 @@ class AsLinkPredictionDataset(DGLDataset):
         The DGLHeteroGraph containing negative validation edges
     neg_test_graph: DGLHeteroGraph
         The DGLHeteroGraph containing negative test edges
+    pos_val_edges: Dict[str, Tuple[Tensor, Tensor]]
+        Positive validation edges, encoded as (edge_type, (edge_src, edge_dst)).
+    pos_test_edges: Dict[str, Tuple[Tensor, Tensor]]
+        Positive test edges, encoded as (edge_type, (edge_src, edge_dst)).
+    neg_val_edges: Dict[str, Tuple[Tensor, Tensor]]
+        Negative validation edges, encoded as (edge_type, (edge_src, edge_dst)).
+    neg_test_edges: Dict[str, Tuple[Tensor, Tensor]]
+        Negative test edges, encoded as (edge_type, (edge_src, edge_dst)).
+    pred_edges: Dict[str, Tuple[Tensor, Tensor]]
+        Prediction edges, encoded as (edge_type, (edge_src, edge_dst)).
     """
 
     def __init__(self,
                  dataset,
                  target_link,
                  target_link_r,
+                 name=None,
                  split_ratio=None,
+                 prediction_ratio=None,
                  neg_ratio=3,
                  neg_sampler='global',
                  **kwargs):
@@ -261,9 +275,11 @@ class AsLinkPredictionDataset(DGLDataset):
                 self.g.edges[etype].data['val_mask'] = val_mask
                 self.g.edges[etype].data['test_mask'] = test_mask
 
-        # create val and test graph(pos and neg respectively)
-        self.pos_val_graph, self.neg_val_graph = self._get_pos_and_neg_graph('val')
-        self.pos_test_graph, self.neg_test_graph = self._get_pos_and_neg_graph('test')
+        # create val and test edges and graph(pos and neg respectively)
+        self.pos_val_edges, self.neg_val_edges = self._get_pos_and_neg_edges('val')
+        self.pos_val_graph, self.neg_val_graph = self._get_pos_and_neg_graph(self.pos_val_edges, self.neg_val_edges)
+        self.pos_test_edges, self.neg_test_edges = self._get_pos_and_neg_edges('test')
+        self.pos_test_graph, self.neg_test_graph = self._get_pos_and_neg_graph(self.pos_test_edges, self.neg_test_edges)
 
         # create train graph
         train_graph = self.g
@@ -285,18 +301,21 @@ class AsLinkPredictionDataset(DGLDataset):
         self.meta_paths = getattr(self.dataset, 'meta_paths', None)
         self.meta_paths_dict = getattr(self.dataset, 'meta_paths_dict', None)
 
-    def _get_pos_and_neg_graph(self, split):
+    def _get_pos_and_neg_edges(self, split):
         if self.neg_sampler == 'global':
             neg_sampler = GlobalUniform(self.neg_ratio)
         elif self.neg_sampler == 'per_source':
             neg_sampler = PerSourceUniform(self.neg_ratio)
         else:
             raise ValueError('Unsupported neg_sampler')
-        edges = {
+        pos_edges = {
             etype: th.nonzero(self.g.edges[etype].data['{}_mask'.format(split)]).squeeze()
             for etype in self.target_link}
-        pos_graph = dgl.edge_subgraph(self.g, edges, relabel_nodes=False, store_ids=True)
-        neg_edges = getattr(self.dataset, 'neg_{}_edges'.format(split), neg_sampler(self.g, edges))
+        neg_edges = getattr(self.dataset, 'neg_{}_edges'.format(split), neg_sampler(self.g, pos_edges))
+        return pos_edges, neg_edges
+
+    def _get_pos_and_neg_graph(self, pos_edges, neg_edges):
+        pos_graph = dgl.edge_subgraph(self.g, pos_edges, relabel_nodes=False, store_ids=True)
         neg_graph = dgl.heterograph(neg_edges, {ntype: pos_graph.num_nodes(ntype) for ntype in pos_graph.ntypes})
         return pos_graph, neg_graph
 
