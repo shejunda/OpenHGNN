@@ -89,9 +89,9 @@ class ieHGCN(BaseModel):
         super(ieHGCN, self).__init__()
         self.num_layers = num_layers
         self.activation = F.elu
-        self.hgcn_layers = nn.ModuleList()
+        self.hgcnum_layers = nn.ModuleList()
         
-        self.hgcn_layers.append(
+        self.hgcnum_layers.append(
             ieHGCNConv(
                 in_dim,
                 hidden_dim,
@@ -103,7 +103,7 @@ class ieHGCN(BaseModel):
         )
 
         for i in range(1, num_layers - 1):
-            self.hgcn_layers.append(
+            self.hgcnum_layers.append(
                 ieHGCNConv(
                     hidden_dim,
                     hidden_dim,
@@ -114,7 +114,7 @@ class ieHGCN(BaseModel):
                 )
             )
         
-        self.hgcn_layers.append(
+        self.hgcnum_layers.append(
             ieHGCNConv(
                 hidden_dim,
                 out_dim,
@@ -144,7 +144,7 @@ class ieHGCN(BaseModel):
         with hg.local_scope():
             hg.ndata['h'] = h_dict
             for l in range(self.num_layers):
-                h_dict = self.hgcn_layers[l](hg, h_dict)
+                h_dict = self.hgcnum_layers[l](hg, h_dict)
             
             return h_dict
 

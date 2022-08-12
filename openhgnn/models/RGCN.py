@@ -24,7 +24,7 @@ class RGCN(BaseModel):
         Relation names.
     num_bases : int, optional
         Number of bases. If is none, use number of relations. Default: None.
-    num_hidden_layers: int
+    num_hiddenum_layers: int
         Number of RelGraphConvLayer
     dropout : float, optional
         Dropout rate. Default: 0.0
@@ -43,7 +43,7 @@ class RGCN(BaseModel):
                    args.out_dim,
                    hg.etypes,
                    args.n_bases,
-                   args.n_layers - 2,
+                   args.num_layers - 2,
                    dropout=args.dropout)
 
     def __init__(self, in_dim,
@@ -51,7 +51,7 @@ class RGCN(BaseModel):
                  out_dim,
                  etypes,
                  num_bases,
-                 num_hidden_layers=1,
+                 num_hiddenum_layers=1,
                  dropout=0,
                  use_self_loop=False):
         super(RGCN, self).__init__()
@@ -64,7 +64,7 @@ class RGCN(BaseModel):
             self.num_bases = len(self.rel_names)
         else:
             self.num_bases = num_bases
-        self.num_hidden_layers = num_hidden_layers
+        self.num_hiddenum_layers = num_hiddenum_layers
         self.dropout = dropout
         self.use_self_loop = use_self_loop
 
@@ -75,7 +75,7 @@ class RGCN(BaseModel):
             self.num_bases, activation=F.relu, self_loop=self.use_self_loop,
             dropout=self.dropout, weight=True))
         # hidden 2 hidden
-        for i in range(self.num_hidden_layers):
+        for i in range(self.num_hiddenum_layers):
             self.layers.append(RelGraphConvLayer(
                 self.h_dim, self.h_dim, self.rel_names,
                 self.num_bases, activation=F.relu, self_loop=self.use_self_loop,

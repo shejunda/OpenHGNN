@@ -70,13 +70,13 @@ class SimpleHGN(BaseModel):
     """
     @classmethod
     def build_model_from_args(cls, args, hg):
-        heads = [args.num_heads] * args.n_layers + [1]
+        heads = [args.num_heads] * args.num_layers + [1]
         return cls(args.edge_dim,
                    len(hg.etypes),
                    [args.hidden_dim],
                    args.h_dim,
                    args.out_dim,
-                   args.n_layers,
+                   args.num_layers,
                    heads,
                    args.feats_drop_rate,
                    args.slope,
@@ -89,11 +89,11 @@ class SimpleHGN(BaseModel):
                 residual, beta):
         super(SimpleHGN, self).__init__()
         self.num_layers = num_layers
-        self.hgn_layers = nn.ModuleList()
+        self.hgnum_layers = nn.ModuleList()
         self.activation = F.elu
 
         # input projection (no residual)
-        self.hgn_layers.append(
+        self.hgnum_layers.append(
             SimpleHGNConv(
                 edge_dim,
                 in_dim[0],
@@ -110,7 +110,7 @@ class SimpleHGN(BaseModel):
         # hidden layers
         for l in range(1, num_layers - 1):  # noqa E741
             # due to multi-head, the in_dim = hidden_dim * num_heads
-            self.hgn_layers.append(
+            self.hgnum_layers.append(
                 SimpleHGNConv(
                     edge_dim,
                     hidden_dim * heads[l - 1],
@@ -125,7 +125,7 @@ class SimpleHGN(BaseModel):
                 )
             )
         # output projection
-        self.hgn_layers.append(
+        self.hgnum_layers.append(
             SimpleHGNConv(
                 edge_dim,
                 hidden_dim * heads[-2],
@@ -161,7 +161,7 @@ class SimpleHGN(BaseModel):
             g = dgl.to_homogeneous(hg, ndata = 'h')
             h = g.ndata['h']
             for l in range(self.num_layers):  # noqa E741
-                h = self.hgn_layers[l](g, h, g.ndata['_TYPE'], g.edata['_TYPE'], True)
+                h = self.hgnum_layers[l](g, h, g.ndata['_TYPE'], g.edata['_TYPE'], True)
                 h = h.flatten(1)
 
         h_dict = to_hetero_feat(h, g.ndata['_TYPE'], hg.ntypes)

@@ -176,11 +176,11 @@ class Mp_encoder(nn.Module):
         super(Mp_encoder, self).__init__()
         # One GCN layer for each meta path based adjacency matrix
         self.act = nn.PReLU()
-        self.gcn_layers = nn.ModuleDict()
+        self.gcnum_layers = nn.ModuleDict()
         for mp in meta_paths_dict:
             one_layer = GraphConv(hidden_size, hidden_size, activation=self.act, allow_zero_in_degree=True)
             one_layer.reset_parameters()
-            self.gcn_layers[mp] = one_layer
+            self.gcnum_layers[mp] = one_layer
         self.meta_paths_dict = meta_paths_dict
         self._cached_graph = None
         self._cached_coalesced_graph = {}
@@ -197,7 +197,7 @@ class Mp_encoder(nn.Module):
 
         for mp, meta_path in self.meta_paths_dict.items():
             new_g = self._cached_coalesced_graph[mp]
-            one = self.gcn_layers[mp](new_g, h)
+            one = self.gcnum_layers[mp](new_g, h)
             semantic_embeddings.append(one)  # node level attention
         z_mp = self.semantic_attention(semantic_embeddings)
         return z_mp

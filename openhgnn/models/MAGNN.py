@@ -233,9 +233,9 @@ class MAGNN_layer(nn.Module):
         #                      feature dimension of metapath instances after encoding)
         in_feats_dst_meta = tuple((in_feats, in_feats))
 
-        self.intra_attn_layers = nn.ModuleDict()
+        self.intra_attnum_layers = nn.ModuleDict()
         for metapath in self.metapath_list:
-            self.intra_attn_layers[metapath] = \
+            self.intra_attnum_layers[metapath] = \
                 MAGNN_attn_intra(in_feats=in_feats_dst_meta, out_feats=in_feats, num_heads=num_heads)
 
         # The linear transformation at the beginning of inter metapath aggregation, including all metapath
@@ -303,7 +303,7 @@ class MAGNN_layer(nn.Module):
 
         # aggregate metapath instances into metapath using ATTENTION
         feat_intra = \
-            self.intra_attn_layers[metapath]([intra_metapath_feat, feat_dict[metapath.split('-')[0]]],
+            self.intra_attnum_layers[metapath]([intra_metapath_feat, feat_dict[metapath.split('-')[0]]],
                                              metapath, metapath_idx)
         return feat_intra
 
