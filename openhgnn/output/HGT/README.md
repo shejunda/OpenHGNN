@@ -216,8 +216,38 @@ Evaluation metric: Micro/Macro-F1
       <td>88.36</td>
       <td>87.37</td>
    </tr>
+</table>
+
+Evaluation metric with mini-batch training: Micro/Macro-F1
+<table>
    <tr>
       <td></td>
+      <td colspan="2" align="center">HGBn-ACM</td>
+      <td colspan="2" align="center">acm4GTN</td>
+      <td colspan="2" align="center">imdb4MAGNN</td>
+      <td colspan="2" align="center">dblp4MAGNN</td>
+   </tr>
+   <tr>
+      <td>Model</td>
+      <td>Micro-F1</td>
+      <td>Macro-F1</td>
+      <td>Micro-F1</td>
+      <td>Macro-F1</td>
+      <td>Micro-F1</td>
+      <td>Macro-F1</td>
+      <td>Micro-F1</td>
+      <td>Macro-F1</td>
+   </tr>
+   <tr>
+      <td>HGT</td>
+      <td>84.23</td>
+      <td>83.98</td>
+      <td>84.43</td>
+      <td>84.33</td>
+      <td>42.09</td>
+      <td>43.16</td>
+      <td>90.29</td>
+      <td>90.91</td>
    </tr>
 </table>
 
